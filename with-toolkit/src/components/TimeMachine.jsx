@@ -42,7 +42,7 @@ class TimeMachine extends Component {
   };
 
   render() {
-    const { closest, loading } = this.props;
+    const { closest, loading, hasError, errorMessage } = this.props;
     return (
       <div className="container h-100">
         <div className="row">
@@ -51,14 +51,16 @@ class TimeMachine extends Component {
           </div>
         </div>
         {loading ? <LoadingSpinner /> : this.renderTimeFound() }
-        {closest.available && (
-          <iframe
-            src={ closest.url || 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
-            width="100%"
-            title="description"
-            height="100%"
-          />
-        )}
+        {hasError ? errorMessage : 
+          closest.available && (
+            <iframe
+              src={ closest.url || 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+              width="100%"
+              title="description"
+              height="100%"
+            />
+          )
+        }
       </div>
     );
   }
@@ -74,8 +76,10 @@ TimeMachine.propTypes = {
 };
 
 const mapStateToProps = (reduxState) => ({
-  closest: reduxState.timeMachineReducer.archived_snapshots.closest,
-  loading: reduxState.timeMachineReducer.loading,
+  closest: reduxState.timeMachine.archived_snapshots.closest,
+  loading: reduxState.timeMachine.loading,
+  hasError: reduxState.timeMachine.error,
+  errorMessage: reduxState.timeMachine.message,
 });
 
 export default connect(mapStateToProps)(TimeMachine);

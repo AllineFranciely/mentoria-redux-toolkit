@@ -1,4 +1,5 @@
-import { LOADING, SET_ARCHIVED_SNAPSHOTS } from '../actions/actionTypes';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import getSnapshot from '../../services/timeMachineAPI';
 
 const INITIAL_STATE = {
   url: 'youtube.com',
@@ -14,26 +15,39 @@ const INITIAL_STATE = {
   loading: false,
 };
 
-const timeMachineReducer = (state = INITIAL_STATE, action) => {
-  switch (action.type) {
-  case SET_ARCHIVED_SNAPSHOTS: {
-    return {
-      ...state,
-      archived_snapshots: action.payload.archived_snapshots,
-      url: action.payload.url,
-      timestamp: action.payload.timestamp,
-      loading: false,
-    };
+export const fetchSnapshot = createAsyncThunk(
+  'timeMachine/fetchSnapshot',
+  async ({url, timestamp}) => {
+    console.log(url, timestamp);
+    const result = await getSnapshot(url, timestamp);
+    console.log(result);
+    return result;
   }
-  case LOADING: {
-    return {
-      ...state,
-      loading: true,
-    };
-  }
-  default:
-    return state;
-  }
-};
+);
 
-export default timeMachineReducer;
+const timeMachineReducer = createSlice({
+  name: 'timeMachine',
+  initialState: INITIAL_STATE,
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchSnapshot.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchSnapshot.fulfilled, (state, action) => {
+        state.archived_snapshots = action.payload.archived_snapshots;
+        state.url = action.payload.url;
+        state.timestamp = action.payload.timestamp;
+        state.loading = false;
+        state.error = false;
+      })
+      .addCase(fetchSnapshot.rejected, (state, action) => {
+        state.loading = false;
+        state.error = true;
+        state.message = action?.payload?.message ?? 'Erro ao buscar dados, tente novamente';
+      })
+  }
+});
+
+export const { setDay, setHour, setMonth, setUrl, setYear } = timeMachineReducer.actions;
+
+export default timeMachineReducer.reducer;

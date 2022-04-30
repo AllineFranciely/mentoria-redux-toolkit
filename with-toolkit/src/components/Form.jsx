@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { fetchTimeMachineApi } from '../redux/actions';
+import { fetchSnapshot } from '../redux/reducers/timeMachineReducer';
 
 class Form extends Component {
   constructor(props) {
@@ -118,7 +118,7 @@ Form.propTypes = {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  onSubmitFormDispatch: (url, timestamp) => dispatch(fetchTimeMachineApi(url, timestamp)),
+  onSubmitFormDispatch: (url, timestamp) => dispatch(fetchSnapshot({url, timestamp})),
 });
 
 export default connect(null, mapDispatchToProps)(Form);
